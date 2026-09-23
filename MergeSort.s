@@ -19,7 +19,7 @@ criar_no:
     sw t0 0(a0) # novo->valor = valor
     sw zero 4(a0) # novo->next = 0
     
-    ret # a0 = endereço do novo nó
+    jr ra # a0 = endereço do novo nó
     
 
 ############ Função de inserir novo nó ####################
@@ -44,11 +44,11 @@ percorrer:
     
 encontrou_fim:
     sw t0 4(t1) # atual->next = novo
-    ret
+    jr ra
  
 lista_vazia:
     mv s0 t0 # s0 = novo
-    ret
+    jr ra
     
 ################# Função de imprimir ######################
 imprimir_lista:
@@ -78,4 +78,4 @@ fim_imprimir:
     li a1 11
     ecall
     
-    ret
+    jr ra
