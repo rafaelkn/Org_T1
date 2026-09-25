@@ -24,6 +24,10 @@ criar_no:
 
 ############ Função de inserir novo nó ####################
 inserir:
+    #salva o endereço de retorno
+    addi sp sp -4
+    sw ra 0(sp)
+
     # criando novo nó
     mv a0 a1
     jal criar_no
@@ -44,10 +48,20 @@ percorrer:
     
 encontrou_fim:
     sw t0 4(t1) # atual->next = novo
+
+    #recupera ra
+    lw ra 0(sp)
+    addi sp sp 4
+
     jr ra
  
 lista_vazia:
     mv s0 t0 # s0 = novo
+
+    #recupera ra
+    lw ra 0(sp)
+    addi sp sp 4
+    
     jr ra
     
 ################# Função de imprimir ######################
