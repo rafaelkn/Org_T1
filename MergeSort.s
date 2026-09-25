@@ -1,17 +1,21 @@
-# s0 = listta
-# t0 = novo
-# t1 = atual
-# t2 = temporário
+# ============================================================
 # a0 = argumento/retorno
 # a1 = argumento
+# s0 = ponteiro da lista
+# ============================================================
 
 
-#################### Função de criar novo nó ####################
+#FUNÇÃO CRIAR_NO
+#a0 = valor,
+#t0 = valor,
+#retorno a0 = endereço do novo nó
+____________________________________________________________________
+
 criar_no:
     # a0 = valor recebido
     mv t0 a0 # guarda o valor
     
-    li a0 9 # syscall para preservar memória
+    li a0 9 # syscall para reservar memória
     li a1 8 # tamanho da struct No
     
     ecall # reserva 8 bytes
@@ -19,12 +23,20 @@ criar_no:
     sw t0 0(a0) # novo->valor = valor
     sw zero 4(a0) # novo->next = 0
     
-    jr ra # a0 = endereço do novo nó
+    jr ra # retorna endereço do novo nó em a0
     
 
-############ Função de inserir novo nó ####################
+#FUNÇÃO INSERIR
+#a0 = argumento/retorno,
+#a1 = valor,
+#s0 = lista,
+#t0 = novo,
+#t1 = atual,
+#t2 = atual->next
+____________________________________________________________________
+
 inserir:
-    #salva o endereço de retorno
+    # salva o endereço de retorno
     addi sp sp -4
     sw ra 0(sp)
 
@@ -49,7 +61,7 @@ percorrer:
 encontrou_fim:
     sw t0 4(t1) # atual->next = novo
 
-    #recupera ra
+    # recupera ra
     lw ra 0(sp)
     addi sp sp 4
 
@@ -58,13 +70,21 @@ encontrou_fim:
 lista_vazia:
     mv s0 t0 # s0 = novo
 
-    #recupera ra
+    # recupera ra
     lw ra 0(sp)
     addi sp sp 4
     
     jr ra
     
-################# Função de imprimir ######################
+
+#FUNÇÃO IMPRIMIR_LISTA
+#s0 = lista,
+#t0 = atual,
+#t1 = atual->valor,
+#a0 = argumento da ecall,
+#a1 = código da ecall
+____________________________________________________________________
+
 imprimir_lista:
     mv t0 s0 # atual = lista
     
@@ -73,12 +93,12 @@ loop_imprimir:
     
     lw t1 0(t0) # t1 = atual->valor
     
-    #imprime interio
+    # imprime inteiro
     mv a0 t1
     li a1 1
     ecall
     
-    #imprime espaço
+    # imprime espaço
     li a0 32
     li a1 11
     ecall
@@ -87,7 +107,7 @@ loop_imprimir:
     j loop_imprimir
     
 fim_imprimir:
-    # imprime '/n'
+    # imprime '\n'
     li a0 10
     li a1 11
     ecall
