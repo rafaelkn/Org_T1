@@ -15,7 +15,7 @@ fim_liberar:
 
   .data
 vetor:
-  .word 5, 3, 8, 1, 9, 2, 7   #v[n] = {......}
+  .word 5, 3, 8, 1, 9, 2, 9   #v[n] = {5,....., 9}
 N:
   .word 7                     # n = 7 (tamanho do vetor)
 
