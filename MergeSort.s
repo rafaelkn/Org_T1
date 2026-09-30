@@ -7,7 +7,8 @@
 
 #FUNÇÃO CRIAR_NO
 #a0 = valor,
-#t0 = valor,
+#t0 = valor temporário,
+#a7 = código da syscall (alocação de memória)
 #retorno a0 = endereço do novo nó
 #____________________________________________________________________
 
@@ -82,7 +83,7 @@ lista_vazia:
 #t0 = atual,
 #t1 = atual->valor,
 #a0 = argumento da ecall,
-#a1 = código da ecall
+#a7 = código da ecall
 #____________________________________________________________________
 
 imprimir_lista:
