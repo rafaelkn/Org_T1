@@ -190,50 +190,53 @@ Fim_split:
 #t1 = b->valor
 #____________________________________________________________________
 
-  addi  sp, sp, -8
-  sw    ra, 0(sp)
-  sw    s0, 4(sp)
+  addi  sp, sp, -8                   # reserva o espaço na stack
+  sw    ra, 0(sp)                    # salva ra
+  sw    s0, 4(sp)                    # salva s0
 
-  mv    s0, zero
+  mv    s0, zero                     # No *resultado = NULL;
 
 If_A:
-  bne   a0, zero, If_B
-  mv    a0, a1
-  lw    s0, 4(sp)
-  add   sp, sp, 8
-  jr    ra
+  bne   a0, zero, If_B              # se o a != NULL pula para o IF_B
+  mv    a0, a1                      # a0 = b
+  lw    s0, 4(sp)                   # restaura s0 original antes de sair porque ele foi sobreescrito com zero na função
+  addi   sp, sp, 8                   # libera o espaço reservado na stack
+  jr    ra                          # return b
 
 If_B:
-  bne   a1, zero, If_valor
-  lw    s0, 4(sp)
-  add   sp, sp, 8
-  jr    ra
+  bne   a1, zero, If_valor         # se o b != NULL pula para o If_valor
+                                   # obs: como o a0 já chega valendo a, pra retornar a não precisa fazer nada
+  lw    s0, 4(sp)                  # restaura s0 
+  addi   sp, sp, 8                  # libera o espaço reservado na stack
+  jr    ra                         # return a;
 
 
+# Se ele chega até aqui é porque o a e o b não são nulos
 If_valor:
-  lw    t0, 0(a0)
-  lw    t1, 0(a1)
-  bgt   t0, t1, Else
-  mv    s0, a0
+  lw    t0, 0(a0)                  #a->valor
+  lw    t1, 0(a1)                  #b->valor
+  bgt   t0, t1, Else               # se o a->valor > b->valor pula para o Else
+  mv    s0, a0                     # resultado = a
 
-  lw    a0, 4(a0)
-  jal   merge
-  sw    a0,4(s0)
-  mv    a0, s0
+  lw    a0, 4(a0)                  # a = a->next
+  jal   merge                      # chamada recursiva: merge(a->next, b)
+  sw    a0,4(s0)                   # resultado->next = o retorno da função merge
+  mv    a0, s0                     # prepara o valor de retorno a0 = resultado
+  j     Fim_merge  
 
 
 Else:
-  mv    s0, a1
-  lw    a1, 4(a1)
-  jal   merge
-  sw    a0, 4(s0)
-  mv    a0, s0
+  mv    s0, a1                    #resultado = b;
+  lw    a1, 4(a1)                 # b = b->next
+  jal   merge                     # chamada recursiva: merge(a, b->next)
+  sw    a0, 4(s0)                 # resultado->next = o retorno da função merge
+  mv    a0, s0                    # prepara o valor de retorno a0 = resultado
 
 Fim_merge:
-  lw    ra, 0(sp)
-  lw    s0, 4(sp)
-  addi  sp, sp, 8
-  jr    ra
+  lw    ra, 0(sp)                 # restaura ra
+  lw    s0, 4(sp)                 # restaura s0
+  addi  sp, sp, 8                 # libera o espaço reservado na stack
+  jr    ra                        # return resultado que ja está em a0
 
 
 
