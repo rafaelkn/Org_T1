@@ -5,6 +5,77 @@
 # ============================================================
 
 
+#____________________________________________________________________
+
+  .data
+vetor:
+  .word 5, 3, 8, 1, 9, 2, 9      #v[n] = {5,....., 9}
+N:
+  .word 7                        # n = 7 (tamanho do vetor)
+
+
+#____________________________________________________________________
+
+
+
+  .text
+main:
+  addi  sp, sp, -20
+  sw    ra, 0(sp)
+  sw    s0, 4(sp)
+  sw    s1, 8(sp)
+  sw    s2, 12(sp)
+  sw    s3, 16(sp)
+
+  mv    s0, zero                 # lista = NULL
+
+  la    s3, vetor                # s3 = &vetor
+  la    t3, N
+  lw    s1, 0(t3)                # s1 = N
+
+  li    s2, 0                    # i = 0
+
+loop_leitura:
+  bge   s2, s1, fim_leitura      # while (i < n)
+
+  slli  t4, s2, 2                # t4 = i * 4
+  add   t4, s3, t4               # t4 = &vetor[i]
+  lw    a1, 0(t4)                # valor (a1) = vetor[i]
+
+  jal   inserir                  # inserir(valor em a1) — s0 (lista) é atualizado internamente pela função
+ 
+
+  addi  s2, s2, 1                #i++
+  j     loop_leitura
+
+fim_leitura:
+  mv    a0, s0                   #a0 = lista
+  jal   imprimir_lista           #imprime antes do merge
+
+  mv    a0, s0                   #a0 = listq
+  jal   merge_sort
+  mv    s0, a0                   # lista = merge_sort(lista)
+
+  mv    a0, s0
+  jal   imprimir_lista           #imprime vetor depois do merge
+
+  mv    a0, s0
+  jal   liberar_lista            # liberar_lista(lista)
+
+  lw    ra, 0(sp)
+  lw    s0, 4(sp)
+  lw    s1, 8(sp)
+  lw    s2, 12(sp)
+  lw    s3, 16(sp)
+  addi  sp, sp, 20               #restaura os regs e desfaz a pilha
+
+  li    a0, 10
+  ecall                          # return 0
+
+
+
+
+
 #FUNÇÃO CRIAR_NO
 #a0 = valor,
 #t0 = valor temporário,
@@ -14,15 +85,19 @@
 
 criar_no:
 # a0 = valor recebido
-  mv    t0 a0                   # guarda o valor
+  addi  sp, sp, -4
+  sw    a0, 0(sp)               # guarda o valor na pilha
 
-  li    a0 8                    # a0 = argumento (quantidade de bytes a alocar)
-  li    a7 9                    # a7 = código da syscall para alocar memória
+  li    a0, 9                   # a0 = código da syscall para alocar memória
+  li    a1, 8                   # a1 = argumento (quantidade de bytes a alocar)
 
-  ecall                         # reserva 8 bytes e retorna o endereço da memória alocada em a0
+ ecall                          # a0 = endereço do novo nó
 
-  sw    t0 0(a0)                # novo->valor = valor
-  sw    zero 4(a0)              # novo->next = null
+  lw    t0, 0(sp)               # recupera o valor
+  addi  sp, sp, 4
+
+  sw    t0, 0(a0)               # novo->valor = valor
+  sw    zero, 4(a0)             # novo->next = null
 
   jr    ra                      # retorna endereço do novo nó em a0 para a função que chamou criar_no
 
@@ -38,47 +113,47 @@ criar_no:
 
 inserir:
 # salva o endereço de retorno
-  addi  sp sp -4                 # reserva espaço para salvar ra
-  sw    ra 0(sp)                 # salva o endereço de retorno na pilha
+  addi  sp, sp, -4                 # reserva espaço para salvar ra
+  sw    ra, 0(sp)                  # salva o endereço de retorno na pilha
 
 # criando novo nó
-  mv    a0 a1                    # salva o valor de a1 em a0
-  jal   criar_no                 # chama criar_no
+  mv    a0, a1                    # salva o valor de a1 em a0
+  jal   criar_no                  # chama criar_no
 
-  mv    t0 a0                    # guarda o endereço do novo nó
+  mv    t0 a0                     # guarda o endereço do novo nó
 
-  beq   s0 zero lista_vazia      # verifica se a lista está vazia, se s0 = 0, pula para lista_vazia
+  beq   s0 zero lista_vazia       # verifica se a lista está vazia, se s0 = 0, pula para lista_vazia
 
-  mv    t1 s0                    # atual = primeiro nó da lista
-                                 # copia o endereço do primeiro nó para t1 (t1 representa o nó atual)
+  mv    t1, s0                    # atual = primeiro nó da lista
+                                  # copia o endereço do primeiro nó para t1 (t1 representa o nó atual)
 
 percorrer:
-  lw    t2 4(t1)                 # t2 = atual->next
+  lw    t2, 4(t1)                 # t2 = atual->next
 
-  beq   t2 zero encontrou_fim    # verifica se o próximo nó é null, se t2 == 0, atual é último nó
+  beq   t2 zero encontrou_fim     # verifica se o próximo nó é null, se t2 == 0, atual é último nó
 
-  mv    t1 t2                    # atual = atual->next
-  j     percorrer                # percorre a lista novamente
+  mv    t1, t2                    # atual = atual->next
+  j     percorrer                 # percorre a lista novamente
 
 encontrou_fim:
-  sw    t0 4(t1)                 # atual->next = novo
-                                 # encadea o último nó ao novo nó
+  sw    t0, 4(t1)                 # atual->next = novo
+                                  # encadea o último nó ao novo nó
 
 # recupera ra
-  lw    ra 0(sp)                # recupera da pilha o endereço de retorno original
-  addi  sp sp 4                 # libera 4 bytes reservados na pilha
+  lw    ra, 0(sp)                 # recupera da pilha o endereço de retorno original
+  addi  sp, sp, 4                 # libera 4 bytes reservados na pilha
 
-  jr    ra                      # retorna para a função que chamou inserir
+  jr    ra                        # retorna para a função que chamou inserir
 
 lista_vazia:
-  mv    s0 t0                   # s0 = endereço do novo nó
-                                # o novo nó passa a ser o primeiro da lista
+  mv    s0, t0                   # s0 = endereço do novo nó
+                                 # o novo nó passa a ser o primeiro da lista
 
 # recupera ra
-  lw    ra 0(sp)                # recupera da pilha o endereço de retorno original
-  addi  sp sp 4                 # libera 4 bytes reservados na pilha
+  lw    ra, 0(sp)                 # recupera da pilha o endereço de retorno original
+  addi  sp, sp, 4                 # libera 4 bytes reservados na pilha
 
-  jr    ra                      # retorna para a função que chamou inserir
+  jr    ra                        # retorna para a função que chamou inserir
 
 
 #FUNÇÃO IMPRIMIR_LISTA
@@ -90,31 +165,31 @@ lista_vazia:
 #____________________________________________________________________
 
 imprimir_lista:
-  mv    t0 s0                    # t0 = endereço do primeiro nó
-                                 # t0 = atual
+  mv    t0, s0                    # t0 = endereço do primeiro nó
+                                  # t0 = atual
 
 loop_imprimir:
-  beq   t0 zero fim_imprimir     # verifica se atual == null, se t0 == 0, termina loop
+  beq   t0 zero fim_imprimir      # verifica se atual == null, se t0 == 0, termina loop
 
-  lw    t1 0(t0)                 # t1 = atual->valor
+  lw    t1, 0(t0)                 # t1 = atual->valor
 
 # imprime inteiro
-  mv    a0 t1                    # copiar valor que sera impresso para s0
-  li    a7 1
+  li    a0, 1                    # a0 = código da ecall
+  mv    a1, t1                   # a1 = argumento da ecall
   ecall                          # executa a syscall e imprime o valor
 
-# imprime espaço
-  li    a0 32                    # a0 = 32, código ASCII do caractere espaço ' '
-  li    a7 11                    # código da syscall para imprimir caractere
+# imprime espaço    
+  li    a0, 11                   # código da syscall para imprimir caractere
+  li    a1, 32                   # a1 = 32, código ASCII do caractere espaço ' '
   ecall                          # executa o syscall e imprime o espaço
 
-  lw    t0 4(t0)                 # t0 = atual->next
+  lw    t0, 4(t0)                # t0 = atual->next
   j     loop_imprimir            # volta para o ínico do loop, para processar o próximo nó
 
-fim_imprimir:
+fim_imprimir:       
 # imprime '\n'
-  li    a0 10                    # a0 = 10, código ASCII da quebra de linha '\n'
-  li    a7 11                    # código da syscall para imprimir caractere
+  li    a0, 11                   # código da syscall para imprimir caractere
+  li    a1, 10                   # a1 = 10, código ASCII da quebra de linha '\n'
   ecall                          # executa a syscall e imprime o caractere
 
   jr    ra                       # retorna para a função que chamou imprimir_lista
@@ -335,69 +410,3 @@ loop_liberar:
 
 fim_liberar:
   jr    ra
-
-
-#____________________________________________________________________
-
-  .data
-vetor:
-  .word 5, 3, 8, 1, 9, 2, 9      #v[n] = {5,....., 9}
-N:
-  .word 7                        # n = 7 (tamanho do vetor)
-
-
-#____________________________________________________________________
-
-
-
-  .text
-main:
-  addi  sp, sp, -16
-  sw    ra, 0(sp)
-  sw    s0, 4(sp)
-  sw    s1, 8(sp)
-  sw    s2, 12(sp)
-
-  mv    s0, zero                 # lista = NULL
-
-  la    t2, vetor                # t2 = &vetor
-  la    t3, N
-  lw    s1, 0(t3)                # s1 = N
-
-  li    s2, 0                    # i = 0
-
-loop_leitura:
-  bge   s2, s1, fim_leitura      # while (i < n)
-
-  slli  t4, s2, 2                # t4 = i * 4
-  add   t4, t2, t4               # t4 = &vetor[i]
-  lw    a1, 0(t4)                # valor (a1) = vetor[i]
-
-  jal   inserir                  # inserir(valor em a1) — s0 (lista) é atualizado internamente pela função
- 
-
-  addi  s2, s2, 1                #i++
-  j     loop_leitura
-
-fim_leitura:
-  mv    a0, s0                   #a0 = lista
-  jal   imprimir_lista           #imprime antes do merge
-
-  mv    a0, s0                   #a0 = listq
-  jal   merge_sort
-  mv    s0, a0                   # lista = merge_sort(lista)
-
-  mv    a0, s0
-  jal   imprimir_lista           #imprime vetor depois do merge
-
-  mv    a0, s0
-  jal   liberar_lista            # liberar_lista(lista)
-
-  lw    ra, 0(sp)
-  lw    s0, 4(sp)
-  lw    s1, 8(sp)
-  lw    s2, 12(sp)
-  addi  sp, sp, 16               #restaura os regs e desfaz a pilha
-
-  li    a7, 10
-  ecall                          # return 0
