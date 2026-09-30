@@ -131,6 +131,7 @@ fim_imprimir:
 #t3 = atual->next
 #____________________________________________________________________
 
+split:
 If:
   beq   a0, zero, If_continuacao          # se lista == NULL pula para o caso especial
   lw    a3, 4(a0)                         # a3 = lista->next
@@ -190,6 +191,7 @@ Fim_split:
 #t1 = b->valor
 #____________________________________________________________________
 
+merge: 
   addi  sp, sp, -8                   # reserva o espaço na stack
   sw    ra, 0(sp)                    # salva ra
   sw    s0, 4(sp)                    # salva s0
@@ -253,6 +255,7 @@ Fim_merge:
 #t0 = lista->next
 #____________________________________________________________________
 
+merge_sort: 
   addi  sp, sp ,-20                                 #reserva 20 bytes (ra + s0 + s1 + espaço p/ frente + espaço p/ tras)
   sw    ra, 0(sp)                                   # salva ra 
   sw    s0, 4(sp)                                   # salva s0 usado para "frente"
