@@ -14,17 +14,17 @@
 
 criar_no:
 # a0 = valor recebido
-  mv    t0 a0                    # guarda o valor
+  mv    t0 a0                   # guarda o valor
 
-  li    a0 8                    # a0 = argumento (tamanho a alocar)
-  li    a7 9                    # a7 = código da syscall 
+  li    a0 8                    # a0 = argumento (quantidade de bytes a alocar)
+  li    a7 9                    # a7 = código da syscall para alocar memória
 
-  ecall                          # reserva 8 bytes
+  ecall                         # reserva 8 bytes e retorna o endereço da memória alocada em a0
 
-  sw    t0 0(a0)                 # novo->valor = valor
-  sw    zero 4(a0)               # novo->next = 0
+  sw    t0 0(a0)                # novo->valor = valor
+  sw    zero 4(a0)              # novo->next = null
 
-  jr    ra                       # retorna endereço do novo nó em a0
+  jr    ra                      # retorna endereço do novo nó em a0 para a função que chamou criar_no
 
 
 #FUNÇÃO INSERIR
@@ -38,44 +38,47 @@ criar_no:
 
 inserir:
 # salva o endereço de retorno
-  addi  sp sp -4
-  sw    ra 0(sp)
+  addi  sp sp -4                 # reserva espaço para salvar ra
+  sw    ra 0(sp)                 # salva o endereço de retorno na pilha
 
 # criando novo nó
-  mv    a0 a1
-  jal   criar_no
+  mv    a0 a1                    # salva o valor de a1 em a0
+  jal   criar_no                 # chama criar_no
 
   mv    t0 a0                    # guarda o endereço do novo nó
 
-  beq   s0 zero lista_vazia
+  beq   s0 zero lista_vazia      # verifica se a lista está vazia, se s0 = 0, pula para lista_vazia
 
   mv    t1 s0                    # atual = primeiro nó da lista
+                                 # copia o endereço do primeiro nó para t1 (t1 representa o nó atual)
 
 percorrer:
   lw    t2 4(t1)                 # t2 = atual->next
 
-  beq   t2 zero encontrou_fim
+  beq   t2 zero encontrou_fim    # verifica se o próximo nó é null, se t2 == 0, atual é último nó
 
   mv    t1 t2                    # atual = atual->next
-  j     percorrer
+  j     percorrer                # percorre a lista novamente
 
 encontrou_fim:
   sw    t0 4(t1)                 # atual->next = novo
+                                 # encadea o último nó ao novo nó
 
 # recupera ra
-  lw    ra 0(sp)
-  addi  sp sp 4
+  lw    ra 0(sp)                # recupera da pilha o endereço de retorno original
+  addi  sp sp 4                 # libera 4 bytes reservados na pilha
 
-  jr    ra
+  jr    ra                      # retorna para a função que chamou inserir
 
 lista_vazia:
-  mv    s0 t0                    # s0 = novo
+  mv    s0 t0                   # s0 = endereço do novo nó
+                                # o novo nó passa a ser o primeiro da lista
 
 # recupera ra
-  lw    ra 0(sp)
-  addi  sp sp 4
+  lw    ra 0(sp)                # recupera da pilha o endereço de retorno original
+  addi  sp sp 4                 # libera 4 bytes reservados na pilha
 
-  jr    ra
+  jr    ra                      # retorna para a função que chamou inserir
 
 
 #FUNÇÃO IMPRIMIR_LISTA
@@ -87,33 +90,34 @@ lista_vazia:
 #____________________________________________________________________
 
 imprimir_lista:
-  mv    t0 s0                    # atual = lista
+  mv    t0 s0                    # t0 = endereço do primeiro nó
+                                 # t0 = atual
 
 loop_imprimir:
-  beq   t0 zero fim_imprimir
+  beq   t0 zero fim_imprimir     # verifica se atual == null, se t0 == 0, termina loop
 
   lw    t1 0(t0)                 # t1 = atual->valor
 
 # imprime inteiro
-  mv    a0 t1
+  mv    a0 t1                    # copiar valor que sera impresso para s0
   li    a7 1
-  ecall
+  ecall                          # executa a syscall e imprime o valor
 
 # imprime espaço
-  li    a0 32
-  li    a7 11
-  ecall
+  li    a0 32                    # a0 = 32, código ASCII do caractere espaço ' '
+  li    a7 11                    # código da syscall para imprimir caractere
+  ecall                          # executa o syscall e imprime o espaço
 
-  lw    t0 4(t0)                 # atual = atual->next
-  j     loop_imprimir
+  lw    t0 4(t0)                 # t0 = atual->next
+  j     loop_imprimir            # volta para o ínico do loop, para processar o próximo nó
 
 fim_imprimir:
 # imprime '\n'
-  li    a0 10
-  li    a7 11
-  ecall
+  li    a0 10                    # a0 = 10, código ASCII da quebra de linha '\n'
+  li    a7 11                    # código da syscall para imprimir caractere
+  ecall                          # executa a syscall e imprime o caractere
 
-  jr    ra
+  jr    ra                       # retorna para a função que chamou imprimir_lista
 
 
 #____________________________________________________________________
