@@ -42,9 +42,9 @@ loop_leitura:
   add   t4, t2, t4            # t4 = &vetor[i]
   lw    a1, 0(t4)             # valor (a1) = vetor[i]
 
-  mv    a0, s0                # a0 = lista
+  
   jal   inserir               # inserir(lista (a0), valor (a1))
-  mv    s0, a0                # lista = inserir(lista, valor)
+  
 
   addi  s2, s2, 1             #i++
   j     loop_leitura
