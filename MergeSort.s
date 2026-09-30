@@ -7,6 +7,7 @@
 
 #____________________________________________________________________
 
+
   .data
 vetor:
   .word 5, 3, 8, 1, 9, 2, 9      #v[n] = {5,....., 9}
@@ -14,7 +15,16 @@ N:
   .word 7                        # n = 7 (tamanho do vetor)
 
 
-#____________________________________________________________________
+#FUNÇÃO MAIN
+#s0 = lista,
+#s1 = N (tamanho do vetor),
+#s2 = i (índice do loop),
+#t2 = &vetor,
+#t3 = &N,
+#t4 = &vetor[i],
+#a0 = argumento das funções (lista) / código de saída,
+#a1 = valor passado para inserir,
+#a7 = código da ecall
 
 
 
@@ -52,7 +62,7 @@ fim_leitura:
   mv    a0, s0                   #a0 = lista
   jal   imprimir_lista           #imprime antes do merge
 
-  mv    a0, s0                   #a0 = listq
+  mv    a0, s0                   #a0 = lista
   jal   merge_sort
   mv    s0, a0                   # lista = merge_sort(lista)
 
@@ -397,6 +407,13 @@ Fim:
 
 #____________________________________________________________________
 
+#FUNÇÃO LIBERAR_LISTA
+# anda pela lista até o fim (o RARS não tem free,
+# então aqui só percorre os nós mesmo)
+#a0 = lista,
+#t0 = atual,
+#t1 = atual->next
+
 
 liberar_lista:
   mv    t0, a0                   # atual (t0) = lista
@@ -410,3 +427,4 @@ loop_liberar:
 
 fim_liberar:
   jr    ra
+
