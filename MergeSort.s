@@ -253,14 +253,14 @@ Fim_merge:
 #t0 = lista->next
 #____________________________________________________________________
 
-  addi  sp, sp ,-20
-  sw    ra, 0(sp)
-  sw    s0, 4(sp)
-  sw    s1, 8(sp)
+  addi  sp, sp ,-20                                 #reserva 20 bytes (ra + s0 + s1 + espaço p/ frente + espaço p/ tras)
+  sw    ra, 0(sp)                                   # salva ra 
+  sw    s0, 4(sp)                                   # salva s0 usado para "frente"
+  sw    s1, 8(sp)                                   # salva s1 usado para "tras"
 
-  beq   a0, zero , Retorne_lista
-  lw    t0, 4(a0)
-  beq   t0, zero , Retorne_lista
+  beq   a0, zero , Retorne_lista                    # lista == NULL pula para o Retorne_lista
+  lw    t0, 4(a0)                                   # t0 = lista->next
+  beq   t0, zero , Retorne_lista                    # se lista->next == NULL pula para o Retorne_lista
 
   j     Split
 
@@ -269,17 +269,19 @@ Retorne_lista:
 
 
 Split:
-  addi  a1, sp, 12
-  addi  a2, sp, 16
-  jal   split
-  lw    s0, 12(sp)
-  lw    s1, 16(sp)
+  addi  a1, sp, 12                                  # a1 = &frente (endereço = topo da pilha + offset 12)   
+  addi  a2, sp, 16                                  # a2 = &tras   (endereço = topo da pilha + offset 16)
+  jal   split                                       # split escreve os resultados em 12(sp)/16(sp)
+  lw    s0, 12(sp)                                  # s0 = frente (traz o valor pra um registrador)
+  lw    s1, 16(sp)                                  # s1 = tras
 
 
+# frente = merge_sort(frente);
   mv    a0, s0
   jal   merge_sort
   mv    s0, a0
 
+# tras = merge_sort(tras);
   mv    a0, s1
   jal   merge_sort
   mv    s1, a0
@@ -290,11 +292,25 @@ Split:
 
 
 Fim:
-  lw    ra, 0(sp)
-  lw    s0, 4(sp)
-  lw    s1, 8(sp)
-  addi  sp, sp, 20
-  jr    ra
+  lw    ra, 0(sp)                               # restaura ra
+  lw    s0, 4(sp)                               # restaura s0
+  lw    s1, 8(sp)                               # restaura s1
+  addi  sp, sp, 20                              # libera o espaço reservado
+  jr    ra                                      # retorna, a0 = lista ordenada
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #____________________________________________________________________
