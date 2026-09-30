@@ -132,45 +132,48 @@ fim_imprimir:
 #____________________________________________________________________
 
 If:
-  beq   a0, zero, If_continuacao
-  lw    a3, 4(a0)
-  beq   a3, zero, If_continuacao
-  li    t0, 0
-  mv    a4 , a0
+  beq   a0, zero, If_continuacao          # se lista == NULL pula para o caso especial
+  lw    a3, 4(a0)                         # a3 = lista->next
+  beq   a3, zero, If_continuacao          # se lista->next == NULL pula para o caso especial também
+  li    t0, 0                             # total = 0
+  mv    a4 , a0                           # atual = lista
 
+
+# Conta quantos nós tem e armazena na variável total
 While:
-  beq   a4 , zero, Fim_while
-  addi  t0, t0, 1
-  lw    a4 , 4(a4 )
-  j     While
+  beq   a4 , zero, Fim_while              # se atual == NULL pula para o Fim do While
+  addi  t0, t0, 1                         # total++
+  lw    a4 , 4(a4 )                       # atual = atual->next
+  j     While                             # repete o loop 
 
+# Acha a posição do meio
 Fim_while:
   li    t1, 2
-  div   a5 , t0, t1
-  mv    a4 , a0
+  div   a5 , t0, t1                       # meio = total / 2
 
-
-
+# Anda até essa posição
+  mv    a4 , a0                           # atual = lista
   li    t2, 1
 For:
-  bge   t2, a5 , Fim_for
-  lw    a4 , 4(a4 )
-  addi  t2, t2, 1
-  j     For
+  bge   t2, a5 , Fim_for                  # se o i >= meio, sai do for
+  lw    a4 , 4(a4 )                       # atual = atual->next
+  addi  t2, t2, 1                         # i = i +1
+  j     For                               # reinicando o loop
+
 
 Fim_for:
-  sw    a0, 0(a1)
-  lw    t3, 4(a4)
-  sw    t3, 0(a2)
-  sw    zero, 4(a4)
-  j     Fim_split
+  sw    a0, 0(a1)                         # *frente = lista
+  lw    t3, 4(a4)                         # t3 = atual->next
+  sw    t3, 0(a2)                         # *tras = atual->next
+  sw    zero, 4(a4)                       # atual->next = NULL
+  j     Fim_split                         # pula o caso especial e vai direto para o fim
 
 If_continuacao:
-  sw    a0, 0(a1)
-  sw    zero, 0(a2)
+  sw    a0, 0(a1)                         # *frente = lista
+  sw    zero, 0(a2)                       # *tras = NULL
 
 Fim_split:
-  jr    ra
+  jr    ra                                # retorna sem valor em a0
 
 
 
