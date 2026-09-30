@@ -15,8 +15,8 @@ criar_no:
 # a0 = valor recebido
   mv    t0 a0                    # guarda o valor
 
-  li    a0 9                     # syscall para reservar memória
-  li    a1 8                     # tamanho da struct No
+  li    a0 8                    # a0 = argumento (tamanho a alocar)
+  li    a7 9                    # a7 = código da syscall 
 
   ecall                          # reserva 8 bytes
 
@@ -95,12 +95,12 @@ loop_imprimir:
 
 # imprime inteiro
   mv    a0 t1
-  li    a1 1
+  li    a7 1
   ecall
 
 # imprime espaço
   li    a0 32
-  li    a1 11
+  li    a7 11
   ecall
 
   lw    t0 4(t0)                 # atual = atual->next
@@ -109,7 +109,7 @@ loop_imprimir:
 fim_imprimir:
 # imprime '\n'
   li    a0 10
-  li    a1 11
+  li    a7 11
   ecall
 
   jr    ra
