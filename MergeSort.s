@@ -361,26 +361,27 @@ Retorne_lista:
 
 
 Split:
-  addi  a1, sp, 12                                  # a1 = &frente (endereço = topo da pilha + offset 12)   
-  addi  a2, sp, 16                                  # a2 = &tras   (endereço = topo da pilha + offset 16)
-  jal   split                                       # split escreve os resultados em 12(sp)/16(sp)
-  lw    s0, 12(sp)                                  # s0 = frente (traz o valor pra um registrador)
+  addi  a1, sp, 12                                  # a1 = &frente, ou seja, o endereço de uma posição da memória   
+  addi  a2, sp, 16                                  # a2 = &tras   
+  jal   split                                       # # split escreve DIRETO nesses endereços
+  lw    s0, 12(sp)                                  # s0 = frente 
   lw    s1, 16(sp)                                  # s1 = tras
 
 
 # frente = merge_sort(frente);
-  mv    a0, s0
-  jal   merge_sort
-  mv    s0, a0
+  mv    a0, s0                                      # prepara o argumento: a0 = frente
+  jal   merge_sort                                  # chama recursivamente
+  mv    s0, a0                                      # frente = retorno
 
 # tras = merge_sort(tras);
-  mv    a0, s1
-  jal   merge_sort
-  mv    s1, a0
+  mv    a0, s1                                      # prepara o argumento: a0 = tras
+  jal   merge_sort                                  # chama recursivamente
+  mv    s1, a0                                      # tras = retorno
 
-  mv    a0, s0
-  mv    a1, s1
-  jal   merge
+# lista = merge(frente, tras);
+  mv    a0, s0                                      # prepara argumento 1: a0 = frente
+  mv    a1, s1                                      # prepara argumento 2: a1 = tras
+  jal   merge                                       # depois desse jal merge o a0 já vai ser o retorno final, então não tem mais o que ser feito
 
 
 Fim:
