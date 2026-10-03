@@ -130,9 +130,9 @@ inserir:
   mv    a0, a1                    # salva o valor de a1 em a0
   jal   criar_no                  # chama criar_no
 
-  mv    t0 a0                     # guarda o endereço do novo nó
+  mv    t0, a0                     # guarda o endereço do novo nó
 
-  beq   s0 zero lista_vazia       # verifica se a lista está vazia, se s0 = 0, pula para lista_vazia
+  beq   s0, zero, lista_vazia       # verifica se a lista está vazia, se s0 = 0, pula para lista_vazia
 
   mv    t1, s0                    # atual = primeiro nó da lista
                                   # copia o endereço do primeiro nó para t1 (t1 representa o nó atual)
@@ -140,7 +140,7 @@ inserir:
 percorrer:
   lw    t2, 4(t1)                 # t2 = atual->next
 
-  beq   t2 zero encontrou_fim     # verifica se o próximo nó é null, se t2 == 0, atual é último nó
+  beq   t2, zero, encontrou_fim     # verifica se o próximo nó é null, se t2 == 0, atual é último nó
 
   mv    t1, t2                    # atual = atual->next
   j     percorrer                 # percorre a lista novamente
@@ -179,7 +179,7 @@ imprimir_lista:
                                   # t0 = atual
 
 loop_imprimir:
-  beq   t0 zero fim_imprimir      # verifica se atual == null, se t0 == 0, termina loop
+  beq   t0, zero, fim_imprimir      # verifica se atual == null, se t0 == 0, termina loop
 
   lw    t1, 0(t0)                 # t1 = atual->valor
 
